@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShadowVault</title>
+  <style>
+    body { background: #0a0a0a; color: #00ff9d; font-family: Arial, sans-serif; text-align: center; padding: 60px; }
+    input { padding: 15px; margin: 10px; width: 320px; background: #111; color: #00ff9d; border: 2px solid #00ff9d; font-size: 16px; }
+    button { padding: 15px 40px; background: #00ff9d; color: black; border: none; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .hidden { display: none; }
+    .vault { max-width: 900px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h1>SHADOWVAULT</h1>
+    <h2>ACCESS RESTRICTED TO USER ONLY</h2>
+    <input type="password" id="pass" placeholder="ENTER PASSWORD"><br><br>
+    <button onclick="checkPass()">UNLOCK</button>
+  </div>
+
+  <div id="vault" class="hidden vault">
+    <h1>WELCOME BACK, USER</h1>
+    <p>Your private website is now running 24/7 and free forever.</p>
+    <p>Current Time: <span id="time"></span></p>
+    <hr>
+    <h2>Private Control Panel</h2>
+    <p>This is your space. Tell me what you want here (Minecraft controls, links, notes, file upload, etc.)</p>
+    <button onclick="logout()">Lock Vault</button>
+  </div>
+
+  <script>
+    const realPass = "yourpassword123";   // ← CHANGE THIS RIGHT NOW TO SOMETHING STRONG
+
+    function checkPass() {
+      if (document.getElementById("pass").value === realPass) {
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("vault").classList.remove("hidden");
+        updateTime();
+      } else {
+        alert("ACCESS DENIED");
+      }
+    }
+
+    function updateTime() {
+      document.getElementById("time").innerHTML = new Date().toLocaleString();
+      setTimeout(updateTime, 1000);
+    }
+
+    function logout() {
+      document.getElementById("vault").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
