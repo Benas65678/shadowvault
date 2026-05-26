@@ -3,41 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShadowVault</title>
+  <title>ShadowVault - Exaroton Control</title>
   <style>
-    body { background: #0a0a0a; color: #00ff9d; font-family: Arial, sans-serif; text-align: center; padding: 60px; }
-    input { padding: 15px; margin: 10px; width: 320px; background: #111; color: #00ff9d; border: 2px solid #00ff9d; font-size: 16px; }
-    button { padding: 15px 40px; background: #00ff9d; color: black; border: none; font-size: 18px; font-weight: bold; cursor: pointer; }
+    body { background: #0a0a0a; color: #00ff9d; font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+    input, button { padding: 12px; margin: 8px; background: #111; color: #00ff9d; border: 2px solid #00ff9d; font-size: 16px; }
+    button { background: #00ff9d; color: black; font-weight: bold; cursor: pointer; }
     .hidden { display: none; }
-    .vault { max-width: 900px; margin: 0 auto; }
+    .status { font-size: 18px; font-weight: bold; }
   </style>
 </head>
 <body>
   <div id="login">
     <h1>SHADOWVAULT</h1>
-    <h2>ACCESS RESTRICTED TO USER ONLY</h2>
+    <h2>ACCESS RESTRICTED</h2>
     <input type="password" id="pass" placeholder="ENTER PASSWORD"><br><br>
     <button onclick="checkPass()">UNLOCK</button>
   </div>
 
-  <div id="vault" class="hidden vault">
-    <h1>WELCOME BACK, USER</h1>
-    <p>Your private website is now running 24/7 and free forever.</p>
+  <div id="vault" class="hidden">
+    <h1>SHADOWVAULT - EXAROTON CONTROL</h1>
+    <p>Welcome back, USER. Your private 24/7 control panel.</p>
     <p>Current Time: <span id="time"></span></p>
     <hr>
-    <h2>Private Control Panel</h2>
-    <p>This is your space. Tell me what you want here (Minecraft controls, links, notes, file upload, etc.)</p>
+
+    <h2>Exaroton Server Control</h2>
+    
+    <input type="text" id="apiKey" placeholder="Exaroton API Key" style="width:400px;"><br>
+    <input type="text" id="serverId" placeholder="Server ID (e.g. abc123def)" style="width:400px;"><br><br>
+    
+    <button onclick="saveCredentials()">Save Credentials</button><br><br>
+    
+    <button onclick="startServer()">▶ START SERVER</button>
+    <button onclick="stopServer()">⏹ STOP SERVER</button>
+    <button onclick="getStatus()">🔄 Check Status</button>
+
+    <p class="status" id="status">Status: Not checked yet</p>
+    <hr>
     <button onclick="logout()">Lock Vault</button>
   </div>
 
   <script>
-    const realPass = "Benas2014";   // ← CHANGE THIS RIGHT NOW TO SOMETHING STRONG
+    const realPass = "123";   // ← Your current password (change if needed)
 
     function checkPass() {
       if (document.getElementById("pass").value === realPass) {
         document.getElementById("login").classList.add("hidden");
         document.getElementById("vault").classList.remove("hidden");
         updateTime();
+        loadCredentials();
       } else {
         alert("ACCESS DENIED");
       }
@@ -47,6 +60,38 @@
       document.getElementById("time").innerHTML = new Date().toLocaleString();
       setTimeout(updateTime, 1000);
     }
+
+    function saveCredentials() {
+      localStorage.setItem("exarotonApiKey", document.getElementById("apiKey").value);
+      localStorage.setItem("exarotonServerId", document.getElementById("serverId").value);
+      alert("Credentials saved in browser (only you can see them)");
+    }
+
+    function loadCredentials() {
+      document.getElementById("apiKey").value = localStorage.getItem("exarotonApiKey") || "";
+      document.getElementById("serverId").value = localStorage.getItem("exarotonServerId") || "";
+    }
+
+    async function apiCall(endpoint) {
+      const apiKey = document.getElementById("apiKey").value;
+      const serverId = document.getElementById("serverId").value;
+      if (!apiKey || !serverId) return alert("Enter API Key and Server ID first");
+
+      try {
+        const res = await fetch(`https://api.exaroton.com/v1/servers/${serverId}/${endpoint}/`, {
+          method: "GET",
+          headers: { "Authorization": "Bearer " + apiKey }
+        });
+        const data = await res.json();
+        document.getElementById("status").innerHTML = `Status: ${data.data || JSON.stringify(data)}`;
+      } catch(e) {
+        alert("Error: " + e.message);
+      }
+    }
+
+    function startServer() { apiCall("start"); }
+    function stopServer() { apiCall("stop"); }
+    function getStatus() { apiCall(""); }   // Empty endpoint = get info
 
     function logout() {
       document.getElementById("vault").classList.add("hidden");
